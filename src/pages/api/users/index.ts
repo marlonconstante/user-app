@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import type { User, UserResponse } from 'types';
 
 function fetchUsers(): Promise<User[]> {
-  return fetch(process.env.USER_API_URL)
+  return fetch(`${process.env.EXTERNAL_API_URL}/users`)
     .then((response) => response.json())
     .then(({ data }: UserResponse) => data);
 }
