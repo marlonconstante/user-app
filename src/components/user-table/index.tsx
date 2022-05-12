@@ -20,6 +20,13 @@ export const UserTable: React.FC<UserTableProps> = ({ className, users }) => {
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200">
+        {users.length === 0 && (
+          <tr>
+            <td colSpan={2} className="px-5 py-2.5">
+              Nenhum usuário encontrado
+            </td>
+          </tr>
+        )}
         {users.map(({ name, age }, index) => (
           <tr key={`user-${index + 1}`}>
             <td className="px-5 py-2.5">{name}</td>
