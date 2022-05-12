@@ -8,6 +8,7 @@ type HomeProps = UserResponse;
 
 const Home: NextPage<HomeProps> = ({ filter, total, size, page, users }) => {
   const searchableRef = useRef<boolean>(false);
+  const controllerRef = useRef<AbortController>();
   const [searchTerm, setSearchTerm] = useState<string>(filter);
   const prevSearchTerm = usePrevious<string>(searchTerm);
   const [pageCount, setPageCount] = useState<number>(Math.ceil(total / size));
@@ -17,19 +18,26 @@ const Home: NextPage<HomeProps> = ({ filter, total, size, page, users }) => {
 
   useEffect(() => {
     if (searchableRef.current) {
+      controllerRef.current?.abort();
+      controllerRef.current = new AbortController();
+
       const query = new URLSearchParams();
       query.set('page', nextPage);
       query.set('size', size.toString());
       if (searchTerm) query.set('filter', searchTerm);
 
-      fetch(`${location.origin}/api/users?${query.toString()}`)
+      const url = `${location.origin}/api/users?${query.toString()}`;
+      const { signal } = controllerRef.current;
+
+      fetch(url, { signal })
         .then((response) => response.json())
         .then((data: UserResponse) => {
           setPageCount(Math.ceil(data.total / data.size));
           setCurrentPage(data.page);
           setCurrentUsers(data.users);
           history.pushState({}, '', `${location.origin}?${query.toString()}`);
-        });
+        })
+        .catch((error: Error) => console.log(error.message));
     } else {
       searchableRef.current = true;
     }
