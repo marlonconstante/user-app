@@ -4,5 +4,9 @@ export type User = {
 };
 
 export type UserResponse = {
-  data: User[];
+  filter: string;
+  page: number;
+  size: number;
+  total: number;
+  users: User[];
 };
