@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import type { NextPage, GetServerSideProps } from 'next';
 import type { User, UserResponse } from 'types';
-import { requestUsers } from '@/libs';
 import { usePrevious } from '@/hooks';
 import { SearchInput, UserTable, Pagination } from '@/components';
 
@@ -62,10 +61,18 @@ const Home: NextPage<HomeProps> = ({ filter, total, size, page, users }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const data = await requestUsers(context.query);
+  function getBaseURL() {
+    const { host = 'localhost' } = context.req.headers;
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    return `${protocol}://${host}`;
+  }
+
+  const query = new URLSearchParams(context.query as Record<string, string>);
+  const url = `${getBaseURL()}/api/users?${query.toString()}`;
+  const data = await fetch(url).then((response) => response.json());
 
   return {
-    props: data,
+    props: data as HomeProps,
   };
 };
 
